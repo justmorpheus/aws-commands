@@ -1,4 +1,6 @@
 ## Check if list of users present in aws or not, used for post-validation
+
+```
 #!/bin/bash
 
 # Read the user_list.txt file line by line
@@ -13,3 +15,4 @@ while read username; do
     echo "User '$username' does not exist in IAM."
   fi
 done <user_list.txt
+```
