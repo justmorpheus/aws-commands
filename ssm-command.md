@@ -3,15 +3,15 @@
 ### SSM Command
 
 ```
-for instance_id in $(awsudo -u sandbox aws ec2 describe-instances --query 'Reservations[].Instances[?State.Name==`running`].[InstanceId]' --output text); do
+for instance_id in $(aws ec2 describe-instances --query 'Reservations[].Instances[?State.Name==`running`].[InstanceId]' --output text); do
     echo "Running command on instance $instance_id"
-    command_id=$(awsudo -u sandbox aws ssm send-command --instance-ids "$instance_id" --document-name "AWS-RunShellScript" --parameters "commands=['ps -auxwww']" --output text --query 'Command.CommandId')
+    command_id=$(aws ssm send-command --instance-ids "$instance_id" --document-name "AWS-RunShellScript" --parameters "commands=['ps -auxwww']" --output text --query 'Command.CommandId')
     echo "Command ID: $command_id"
     status="Pending"
     while [[ "$status" == "Pending" || "$status" == "InProgress" ]]; do
     sleep 5
-    status=$(awsudo -u sandbox aws ssm list-command-invocations --command-id "$command_id" --instance-id "$instance_id" --query 'CommandInvocations[].Status' --output text)
+    status=$(aws ssm list-command-invocations --command-id "$command_id" --instance-id "$instance_id" --query 'CommandInvocations[].Status' --output text)
     done
-    awsudo -u sandbox aws ssm list-command-invocations --command-id "$command_id" --details --query 'CommandInvocations[0].CommandPlugins[0]' --output text > $instance_id.txt
+    aws ssm list-command-invocations --command-id "$command_id" --details --query 'CommandInvocations[0].CommandPlugins[0]' --output text > $instance_id.txt
 done 
 ```
